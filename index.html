@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Registro de Erros</title>
+    <link rel="shortcut icon"
+    href="https://play-lh.googleusercontent.com/-4UcPgppCEfKjvuvCxk42Stqjo7vbiz03f9IDR5wyVLL-AtX-ma7i9c1qPQ-rnKWoA=w240-h480-rw"
+    type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: auto;
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            color: #2410d8;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #2410d8;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #saldo {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #lista-erros {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        #lista-erros li {
+            margin-bottom: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f7f7f7;
+            text-align: center;
+        }
+
+        .assinatura {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        #setor,
+        #erro,
+        #campoCTE {
+            margin: auto;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            label {
+                display: inline-block;
+                margin-top: 0;
+            }
+
+            input[type="text"],
+            select {
+                width: 200px;
+            }
+
+            button {
+                margin-top: 0;
+            }
+        }
+
+        #setor{
+
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>Registro de Erros</h1>
+        <label for="colaborador">Colaborador:</label><br>
+        <select id="colaborador" onchange="mostrarErros()">
+            <option value="">Selecione um colaborador</option>
+            <option value="Ana">Ana</option>
+            <option value="Carlos">Carlos</option>
+            <option value="Maria">Maria</option>
+            <option value="Pedro">Pedro</option>
+            <option value="João">João</option>
+        </select>
+        <br>
+
+        <label for="setor" id="setorLabel" style="display: none;">Setor:</label>
+        <select id="setor" style="display: none;">
+            <option value="">Selecione um setor</option>
+            <option value="Jau 1">Jau 1</option>
+            <option value="Jau 2">Jau 2</option>
+            <option value="Avenida">Avenida</option>
+            <option value="Centro">Centro</option>
+            <option value="Dois Córregos">Dois Córregos</option>
+            <option value="Barra Bonita">Barra Bonita</option>
+            <option value="Bariri">Bariri</option>
+            <option value="Plataforma">Plataforma</option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Bocaina">Bocaina</option>
+        </select>
+
+        <label for="erro" id="erroLabel" style="display: none;">Erro:</label>
+        <select id="erro" onchange="mostrarCampoCTE()" style="display: none;">
+            <option value="">Selecione um erro</option>
+            <option value="Entrega não realizada" data-desconto="10">Entrega não realizada</option>
+            <option value="Levou sem documento" data-desconto="5">Levou sem documento</option>
+            <option value="Não olhou retira" data-desconto="7">Não olhou retira</option>
+            <option value="Não romaneou o CTE" data-desconto="8">Não romaneou o CTE</option>
+            <option value="Não bateu o cartão de ponto" data-desconto="3">Não bateu o cartão de ponto</option>
+            <option value="Erro de emissão" data-desconto="6">Erro de emissão</option>
+            <option value="Erro de local de entrega" data-desconto="8">Erro de local de entrega</option>
+            <option value="Erro de pagador de frete" data-desconto="9">Erro de pagador de frete</option>
+        </select>
+
+        <br>
+
+        <div id="campoCTE" style="display: none;">
+            <label for="cte">CTE:</label>
+            <input type="text" id="cte">
+        </div>
+        <br>
+        
+
+
+        <button onclick="registrarErro()">Registrar Erro</button>
+        <button onclick="gerarRelatorio()">Gerar Relatório</button>
+        <button onclick="limparDados()">Limpar Dados</button>
+
+
+        <div id="saldo"></div>
+
+        <ul id="lista-erros"></ul>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script>
+        const colaboradores = [
+            { nome: 'Ana', saldo: 180, erros: [] },
+            { nome: 'Carlos', saldo: 180, erros: [] },
+            { nome: 'Maria', saldo: 180, erros: [] },
+            { nome: 'Pedro', saldo: 180, erros: [] },
+            { nome: 'João', saldo: 180, erros: [] }
+        ];
+
+        function mostrarErros() {
+            const colaboradorSelect = document.getElementById('colaborador');
+            const setorLabel = document.getElementById('setorLabel');
+            const setorSelect = document.getElementById('setor');
+            const erroLabel = document.getElementById('erroLabel');
+            const erroSelect = document.getElementById('erro');
+
+            const colaboradorIndex = colaboradorSelect.selectedIndex;
+            const colaborador = colaboradores[colaboradorIndex - 1];
+
+            if (colaboradorIndex === 0) {
+                setorLabel.style.display = 'none';
+                setorSelect.style.display = 'none';
+                erroLabel.style.display = 'none';
+                erroSelect.style.display = 'none';
+                return;
+            }
+
+            setorLabel.style.display = 'block';
+            setorSelect.style.display = 'block';
+            erroLabel.style.display = 'block';
+            erroSelect.style.display = 'block';
+
+            setorSelect.selectedIndex = 0;
+            erroSelect.selectedIndex = 0;
+
+            const saldoDiv = document.getElementById('saldo');
+            saldoDiv.textContent = `Saldo do Colaborador: R$ ${colaborador.saldo.toFixed(2)}`;
+
+            const listaErros = document.getElementById('lista-erros');
+            listaErros.innerHTML = '';
+
+            colaborador.erros.forEach((erro) => {
+                const li = document.createElement('li');
+                li.textContent = `Colaborador: ${colaborador.nome} | Setor: ${erro.setor} | Erro: ${erro.erro} | Desconto: R$ ${erro.desconto.toFixed(2)}`;
+                listaErros.appendChild(li);
+            });
+
+            if (erroSelect.value === 'Não romaneou o CTE') {
+                document.getElementById('campoCTE').style.display = 'block';
+            } else {
+                document.getElementById('campoCTE').style.display = 'none';
+            }
+        }
+
+        function registrarErro() {
+            const colaboradorSelect = document.getElementById('colaborador');
+            const setorSelect = document.getElementById('setor');
+            const erroSelect = document.getElementById('erro');
+            const saldoDiv = document.getElementById('saldo');
+            const listaErros = document.getElementById('lista-erros');
+            const cteInput = document.getElementById('cte');
+
+            const colaboradorIndex = colaboradorSelect.selectedIndex;
+            const setor = setorSelect.value;
+            const erro = erroSelect.value;
+            const desconto = parseFloat(erroSelect.options[erroSelect.selectedIndex].dataset.desconto);
+            const cte = cteInput.value.trim();
+
+            if (colaboradorIndex === 0 || setor === '' || erro === '') {
+                alert('Por favor, selecione todas as opções antes de registrar o erro.');
+                return;
+            }
+
+            if (erro === 'Não romaneou o CTE' && cte === '') {
+                alert('Por favor, preencha o campo CTE.');
+                return;
+            }
+
+            const colaborador = colaboradores[colaboradorIndex - 1];
+            colaborador.erros.push({ setor, erro, desconto, cte });
+            colaborador.saldo -= desconto;
+
+            saldoDiv.textContent = `Saldo do Colaborador: R$ ${colaborador.saldo.toFixed(2)}`;
+
+            const li = document.createElement('li');
+            li.textContent = `Colaborador: ${colaborador.nome} | Setor: ${setor} | Erro: ${erro} | Desconto: R$ ${desconto.toFixed(2)} | CTE: ${cte}`;
+            listaErros.appendChild(li);
+
+            localStorage.setItem('colaboradores', JSON.stringify(colaboradores));
+        }
+
+        function gerarRelatorio() {
+            const colaboradorSelect = document.getElementById('colaborador');
+            const colaboradorIndex = colaboradorSelect.selectedIndex;
+            const colaborador = colaboradores[colaboradorIndex - 1];
+
+            if (colaboradorIndex === 0) {
+                alert('Por favor, selecione um colaborador.');
+                return;
+            }
+
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text('Rosseto & Araujo Transportes', 20, 20);
+
+            doc.setFontSize(12);
+            doc.text(`Colaborador: ${colaborador.nome}`, 20, 30);
+            doc.text(`Saldo: R$ ${colaborador.saldo.toFixed(2)}`, 20, 40);
+
+            if (colaborador.erros.length === 0) {
+                doc.setFontSize(24);
+                doc.setFontType('bold');
+                doc.text('Parabéns, você não teve erros!', 20, 60);
+            } else {
+                const listaErros = colaborador.erros.map((erro) => `- Setor: ${erro.setor} | Erro: ${erro.erro} | Desconto: R$ ${erro.desconto.toFixed(2)} | CTE: ${erro.cte}`);
+                doc.setFontSize(12);
+                doc.text('Erros Registrados:', 20, 60);
+                doc.setFontSize(10);
+                doc.text(listaErros, 20, 70);
+            }
+
+            doc.text('Assinatura: _______________________', 20, 130);
+            doc.setFontSize(12);
+            doc.text('Data: ____/___/____', 20, 140);
+
+            doc.save('relatorio_erros.pdf');
+        }
+
+        const savedColaboradores = localStorage.getItem('colaboradores');
+        if (savedColaboradores) {
+            const parsedColaboradores = JSON.parse(savedColaboradores);
+            parsedColaboradores.forEach((colaborador, index) => {
+                colaboradores[index].saldo = colaborador.saldo;
+                colaboradores[index].erros = colaborador.erros;
+            });
+        }
+
+        function mostrarCampoCTE() {
+            const erroSelect = document.getElementById('erro');
+            const campoCTE = document.getElementById('campoCTE');
+
+            if (erroSelect.value === 'Levou sem documento') {
+                campoCTE.style.display = 'block';
+            } else {
+                campoCTE.style.display = 'none';
+            }
+        }
+
+
+
+        function limparDados() {
+            const colaboradorSelect = document.getElementById('colaborador');
+            const setorSelect = document.getElementById('setor');
+            const erroSelect = document.getElementById('erro');
+            const cteInput = document.getElementById('cte');
+            const saldoDiv = document.getElementById('saldo');
+            const listaErros = document.getElementById('lista-erros');
+
+            colaboradorSelect.selectedIndex = 0;
+            setorSelect.selectedIndex = 0;
+            erroSelect.selectedIndex = 0;
+            cteInput.value = '';
+
+            listaErros.innerHTML = '';
+
+            saldoDiv.textContent = '';
+
+            localStorage.clear();
+
+            const campoCTE = document.getElementById('campoCTE');
+            campoCTE.style.display = 'none';
+        }
+
+    </script>
+</body>
+
+</html>
