@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 
 <head>
     <title>Registro de Erros</title>
@@ -96,6 +96,8 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+      
     </style>
     </style>
 </head>
@@ -106,10 +108,10 @@
         <label for="colaborador">Colaborador:</label><br>
         <select id="colaborador" onchange="mostrarErros()">
             <option value="">Selecione um colaborador</option>
-            <option value="Ana">Ana</option>
-            <option value="Carlos">Carlos</option>
-            <option value="Maria">Maria</option>
-            <option value="Pedro">Pedro</option>
+            <option value="Elton">Elton</option>
+            <option value="Bruno">Bruno</option>
+            <option value="Jessica">Jessica</option>
+            <option value="Beatriz">Beatriz</option>
             <option value="João">João</option>
         </select>
         <br>
@@ -130,7 +132,7 @@
         </select>
 
         <label for="erro" id="erroLabel" style="display: none;">Erro:</label>
-        <select id="erro" onchange="mostrarCampoCTE()" style="display: none;">
+        <select id="erro" onchange="exibirCampoCTe()" style="display: none;">
             <option value="">Selecione um erro</option>
             <option value="Entrega não realizada" data-desconto="10">Entrega não realizada</option>
             <option value="Levou sem documento" data-desconto="5">Levou sem documento</option>
@@ -144,11 +146,11 @@
 
         <br>
 
-        <div id="campoCTE" style="display: none;">
-            <label for="cte">CTE:</label>
-            <input type="text" id="cte">
-        </div>
-        <br>
+        <div id="campoCTe" style="display: none;">
+            <label for="cte"></label>
+            <input type="text" id="cte" name="cte" placeholder="Digite o CT-e">
+          </div>
+          <br>
         
 
 
@@ -164,10 +166,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
     <script>
         const colaboradores = [
-            { nome: 'Ana', saldo: 180, erros: [] },
-            { nome: 'Carlos', saldo: 180, erros: [] },
-            { nome: 'Maria', saldo: 180, erros: [] },
-            { nome: 'Pedro', saldo: 180, erros: [] },
+            { nome: 'Elton', saldo: 180, erros: [] },
+            { nome: 'Bruno', saldo: 180, erros: [] },
+            { nome: 'Jessica', saldo: 180, erros: [] },
+            { nome: 'Beatriz', saldo: 180, erros: [] },
             { nome: 'João', saldo: 180, erros: [] }
         ];
 
@@ -300,16 +302,18 @@
             });
         }
 
-        function mostrarCampoCTE() {
-            const erroSelect = document.getElementById('erro');
-            const campoCTE = document.getElementById('campoCTE');
+        function exibirCampoCTe() {
+    var motivo = document.getElementById("erro");
+    var campoCTe = document.getElementById("campoCTe");
 
-            if (erroSelect.value === 'Levou sem documento') {
-                campoCTE.style.display = 'block';
-            } else {
-                campoCTE.style.display = 'none';
-            }
-        }
+    if (motivo.value === "Entrega não realizada" ||
+        motivo.value === "Levou sem documento" ||
+        motivo.value === "Não romaneou o CTE") {
+      campoCTe.style.display = "block";
+    } else {
+      campoCTe.style.display = "none";
+    }
+  }
 
 
 
